@@ -7,7 +7,6 @@ app = Flask(__name__)
 
 
 def get_db():
-    """اتصال به دیتابیس (todo.db) و ذخیره اتصال در شیء g"""
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DB)
@@ -15,7 +14,6 @@ def get_db():
     return db
 
 def init_db():
-    """مقداردهی اولیه به دیتابیس: ایجاد جدول tasks در صورت عدم وجود"""
     db = get_db()
     db.execute('''
     CREATE TABLE IF NOT EXISTS tasks (
@@ -29,7 +27,6 @@ def init_db():
 
 @app.teardown_appcontext
 def close_connection(exception):
-    """بستن اتصال دیتابیس پس از هر درخواست"""
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
