@@ -4,85 +4,554 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>برنامه مدیریت وظایف ساده</title>
+  <title>مدیریت وظایف</title>
+  
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Vazir Font -->
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirfont@v30.1.0/dist/font-face.css" rel="stylesheet">
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
+    * {
+      font-family: 'Vazir', Tahoma, sans-serif;
+    }
+
     body {
-      font-family: Tahoma, sans-serif;
+      background: #f4f5f7;
+      color: #172b4d;
+      font-size: 14px;
+    }
+
+    .header {
+      background: #0052cc;
+      color: white;
+      padding: 16px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .stats-container {
+      padding: 0 24px 24px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 4px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+      border-right: 4px solid;
+    }
+
+    .stat-card.total {
+      border-color: #0052cc;
+    }
+
+    .stat-card.done {
+      border-color: #36b37e;
+    }
+
+    .stat-card.pending {
+      border-color: #ffab00;
+    }
+
+    .stat-card h6 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      color: #5e6c84;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .stat-card .number {
+      font-size: 32px;
+      font-weight: 600;
+      color: #172b4d;
+    }
+
+    .add-task-form {
+      background: white;
+      padding: 16px;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      margin: 0 24px 24px;
+    }
+
+    .kanban-board {
+      display: flex;
+      gap: 16px;
+      padding: 0 24px 24px;
+      overflow-x: auto;
+      min-height: 600px;
+    }
+
+    .kanban-column {
+      flex: 1;
+      min-width: 280px;
+      background: #f4f5f7;
+      border-radius: 4px;
+      padding: 12px;
+    }
+
+    .kanban-column-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 8px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #5e6c84;
+      text-transform: uppercase;
+    }
+
+    .kanban-column-header .count {
+      background: #dfe1e6;
+      color: #172b4d;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .kanban-column.todo .kanban-column-header {
+      color: #0052cc;
+    }
+
+    .kanban-column.todo .kanban-column-header .count {
+      background: #deebff;
+      color: #0052cc;
+    }
+
+    .kanban-column.in-progress .kanban-column-header {
+      color: #ffab00;
+    }
+
+    .kanban-column.in-progress .kanban-column-header .count {
+      background: #fff4e6;
+      color: #ffab00;
+    }
+
+    .kanban-column.done .kanban-column-header {
+      color: #36b37e;
+    }
+
+    .kanban-column.done .kanban-column-header .count {
+      background: #e3fcef;
+      color: #36b37e;
+    }
+
+    .task-card {
+      background: white;
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      cursor: grab;
+      transition: all 0.2s;
+      border-right: 3px solid transparent;
+    }
+
+    .task-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .task-card.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+
+    .task-card.todo {
+      border-color: #0052cc;
+    }
+
+    .task-card.in-progress {
+      border-color: #ffab00;
+    }
+
+    .task-card.done {
+      border-color: #36b37e;
+    }
+
+    .task-card.done .task-title {
+      text-decoration: line-through;
+      color: #5e6c84;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #172b4d;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #5e6c84;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .task-actions button {
+      background: transparent;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .task-actions button:hover {
+      background: #f4f5f7;
+    }
+
+    .btn-toggle {
+      color: #0052cc;
+    }
+
+    .btn-toggle:hover {
+      background: #deebff;
+    }
+
+    .btn-delete {
+      color: #de350b;
+    }
+
+    .btn-delete:hover {
+      background: #ffebe6;
+    }
+
+    .drop-zone {
+      min-height: 100px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .drop-zone.drag-over {
+      background: rgba(0, 82, 204, 0.1);
+      border: 2px dashed #0052cc;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #5e6c84;
+      font-size: 13px;
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .btn-primary {
+      background: #0052cc;
+      border: none;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background: #0065ff;
+    }
+
+    .form-control {
+      border: 1px solid #dfe1e6;
+      border-radius: 3px;
+      padding: 8px 12px;
+    }
+
+    .form-control:focus {
+      border-color: #0052cc;
+      box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .kanban-board {
+        flex-direction: column;
+      }
+      
+      .kanban-column {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
 
-<body class="bg-light">
-  <div class="container py-4">
-    <h1 class="mb-3">مدیریت وظایف </h1>
-
-    <div class="row mb-4 text-center">
-      <div class="col-md-4">
-        <div class="card bg-primary text-white">
-          <div class="card-body">
-            <h5 class="card-title">کل وظایف</h5>
-            <p class="card-text fs-3">{{ total }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card bg-success text-white">
-          <div class="card-body">
-            <h5 class="card-title">انجام‌شده</h5>
-            <p class="card-text fs-3">{{ done }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card bg-warning text-dark">
-          <div class="card-body">
-            <h5 class="card-title">باقی‌مانده</h5>
-            <p class="card-text fs-3">{{ pending }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="card mb-3">
-      <div class="card-body">
-        <form method="post" action="/add" class="d-flex gap-2">
-          <input name="title" class="form-control" placeholder="عنوان وظیفه..." required>
-          <button class="btn btn-primary">افزودن</button>
-        </form>
-      </div>
-    </div>
-
-    <ul class="list-group">
-      {% for t in tasks %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          {% if t.done %}
-          <s>{{ t.title }}</s>
-          <span class="badge bg-success ms-2">انجام‌شده</span>
-          {% else %}
-          {{ t.title }}
-          {% endif %}
-          <div class="small text-muted">ایجاد شده: {{ t.created_at }}</div>
-        </div>
-        <div class="btn-group">
-          <form method="post" action="/toggle/{{t.id}}">
-            <button class="btn btn-sm btn-outline-secondary" type="submit">
-              {% if t.done %}برگرداندن{% else %}انجام شد{% endif %}
-            </button>
-          </form>
-          <form method="post" action="/delete/{{t.id}}"
-            onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید این وظیفه را حذف کنید؟');">
-            <button class="btn btn-sm btn-outline-danger">حذف</button>
-          </form>
-        </div>
-      </li>
-      {% else %}
-      <li class="list-group-item">هیچ وظیفه‌ای ثبت نشده.</li>
-      {% endfor %}
-    </ul>
-
-    <hr>
+<body>
+  <div class="header">
+    <h1><i class="fas fa-tasks"></i> مدیریت وظایف</h1>
   </div>
+
+  <div class="stats-container">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="stat-card total">
+          <h6><i class="fas fa-list"></i> کل وظایف</h6>
+          <div class="number">{{ total }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card done">
+          <h6><i class="fas fa-check-circle"></i> انجام‌شده</h6>
+          <div class="number">{{ done }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card pending">
+          <h6><i class="fas fa-clock"></i> باقی‌مانده</h6>
+          <div class="number">{{ pending }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="add-task-form">
+    <form method="post" action="/add" class="d-flex gap-2">
+      <input name="title" class="form-control flex-grow-1" placeholder="عنوان وظیفه جدید را وارد کنید..." required>
+      <button class="btn btn-primary"><i class="fas fa-plus"></i> افزودن</button>
+    </form>
+  </div>
+
+  <div class="kanban-board" id="kanbanBoard">
+    <!-- To Do Column -->
+    <div class="kanban-column todo" data-status="todo" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+      <div class="kanban-column-header">
+        <span><i class="fas fa-circle" style="font-size: 8px; margin-left: 8px;"></i> انجام نشده</span>
+        <span class="count" id="count-todo">{{ pending }}</span>
+      </div>
+      <div class="drop-zone" id="drop-todo">
+        {% for t in tasks %}
+          {% if t.status == 'todo' %}
+          <div class="task-card todo" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" data-task-id="{{ t.id }}" data-status="todo">
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-meta">
+              <span><i class="far fa-clock"></i> {{ t.created_at[:10] }}</span>
+            </div>
+            <div class="task-actions">
+              <form method="post" action="/update_status/{{t.id}}" style="display: inline;">
+                <input type="hidden" name="status" value="in_progress">
+                <button type="submit" class="btn-toggle" title="انتقال به در حال انجام">
+                  <i class="fas fa-arrow-left"></i> در حال انجام
+                </button>
+              </form>
+              <form method="post" action="/delete/{{t.id}}" onsubmit="return confirm('آیا مطمئن هستید؟');" style="display: inline;">
+                <button type="submit" class="btn-delete" title="حذف">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+        {% if tasks|selectattr('status', 'equalto', 'todo')|list|length == 0 %}
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p>هیچ وظیفه‌ای وجود ندارد</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- In Progress Column -->
+    <div class="kanban-column in-progress" data-status="in_progress" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+      <div class="kanban-column-header">
+        <span><i class="fas fa-circle" style="font-size: 8px; margin-left: 8px;"></i> در حال انجام</span>
+        <span class="count" id="count-in-progress">{{ in_progress }}</span>
+      </div>
+      <div class="drop-zone" id="drop-in-progress">
+        {% for t in tasks %}
+          {% if t.status == 'in_progress' %}
+          <div class="task-card in-progress" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" data-task-id="{{ t.id }}" data-status="in_progress">
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-meta">
+              <span><i class="far fa-clock"></i> {{ t.created_at[:10] }}</span>
+              <span class="badge bg-warning text-dark">در حال انجام</span>
+            </div>
+            <div class="task-actions">
+              <form method="post" action="/update_status/{{t.id}}" style="display: inline;">
+                <input type="hidden" name="status" value="done">
+                <button type="submit" class="btn-toggle" title="انتقال به انجام شده">
+                  <i class="fas fa-check"></i> انجام شد
+                </button>
+              </form>
+              <form method="post" action="/delete/{{t.id}}" onsubmit="return confirm('آیا مطمئن هستید؟');" style="display: inline;">
+                <button type="submit" class="btn-delete" title="حذف">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+        {% if tasks|selectattr('status', 'equalto', 'in_progress')|list|length == 0 %}
+        <div class="empty-state">
+          <i class="fas fa-spinner"></i>
+          <p>هیچ وظیفه در حال انجامی وجود ندارد</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Done Column -->
+    <div class="kanban-column done" data-status="done" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+      <div class="kanban-column-header">
+        <span><i class="fas fa-circle" style="font-size: 8px; margin-left: 8px;"></i> انجام شده</span>
+        <span class="count" id="count-done">{{ done }}</span>
+      </div>
+      <div class="drop-zone" id="drop-done">
+        {% for t in tasks %}
+          {% if t.status == 'done' %}
+          <div class="task-card done" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" data-task-id="{{ t.id }}" data-status="done">
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-meta">
+              <span><i class="far fa-clock"></i> {{ t.created_at[:10] }}</span>
+              <span class="badge bg-success">انجام شده</span>
+            </div>
+            <div class="task-actions">
+              <form method="post" action="/update_status/{{t.id}}" style="display: inline;">
+                <input type="hidden" name="status" value="todo">
+                <button type="submit" class="btn-toggle" title="برگرداندن">
+                  <i class="fas fa-undo"></i> برگرداندن
+                </button>
+              </form>
+              <form method="post" action="/delete/{{t.id}}" onsubmit="return confirm('آیا مطمئن هستید؟');" style="display: inline;">
+                <button type="submit" class="btn-delete" title="حذف">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+        {% if tasks|selectattr('status', 'equalto', 'done')|list|length == 0 %}
+        <div class="empty-state">
+          <i class="fas fa-check-circle"></i>
+          <p>هیچ وظیفه انجام شده‌ای وجود ندارد</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let draggedElement = null;
+    let draggedStatus = null;
+
+    function handleDragStart(e) {
+      draggedElement = e.target;
+      draggedStatus = e.target.dataset.status;
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', e.target.outerHTML);
+    }
+
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+      // Remove drag-over class from all drop zones
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.classList.remove('drag-over');
+      });
+    }
+
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      
+      const dropZone = e.currentTarget.querySelector('.drop-zone');
+      if (dropZone) {
+        dropZone.classList.add('drag-over');
+      }
+      return false;
+    }
+
+    function handleDragLeave(e) {
+      const dropZone = e.currentTarget.querySelector('.drop-zone');
+      if (dropZone) {
+        dropZone.classList.remove('drag-over');
+      }
+    }
+
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      const dropZone = e.currentTarget.querySelector('.drop-zone');
+      if (dropZone) {
+        dropZone.classList.remove('drag-over');
+      }
+
+      const newStatus = e.currentTarget.dataset.status;
+      
+      if (draggedElement && draggedStatus !== newStatus) {
+        const taskId = draggedElement.dataset.taskId;
+        
+        // Update task status via form submission
+        if (newStatus && taskId) {
+          submitStatusChange(taskId, newStatus);
+        }
+      }
+
+      return false;
+    }
+
+    function submitStatusChange(taskId, status) {
+      // Create a form and submit it
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/update_status/${taskId}`;
+      
+      const statusInput = document.createElement('input');
+      statusInput.type = 'hidden';
+      statusInput.name = 'status';
+      statusInput.value = status;
+      form.appendChild(statusInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    // Update counts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateColumnCounts();
+    });
+
+    function updateColumnCounts() {
+      const todoCount = document.querySelectorAll('#drop-todo .task-card').length;
+      const inProgressCount = document.querySelectorAll('#drop-in-progress .task-card').length;
+      const doneCount = document.querySelectorAll('#drop-done .task-card').length;
+      
+      document.getElementById('count-todo').textContent = todoCount;
+      document.getElementById('count-in-progress').textContent = inProgressCount;
+      document.getElementById('count-done').textContent = doneCount;
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
